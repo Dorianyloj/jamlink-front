@@ -110,7 +110,6 @@ const AddInstrumentSection = ({theme, userId}) => {
         />  
         <Button.Default 
           type="submit" 
-          style={{ marginLeft: '10px' }}
           disabled={loading || !selectedInstrumentId}
         >
           Ajouter

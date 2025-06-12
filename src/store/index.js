@@ -139,6 +139,29 @@ export const fetchUserProfile = createAsyncThunk(
   }  
 );
 
+// Action pour vérifier le token au démarrage
+export const checkAuthStatus = createAsyncThunk(
+  "auth/checkAuthStatus",
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        return rejectWithValue("Aucun token trouvé");
+      }
+
+      // Vérifier la validité du token en récupérant le profil
+      const response = await dispatch(fetchUserProfile()).unwrap();
+      return response;
+    } catch (error) {
+      // Token invalide, nettoyer le localStorage
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      return rejectWithValue("Token invalide ou expiré");
+    }
+  }
+);
+
 // Slice pour l'authentification
 const authSlice = createSlice({  
   name: 'auth',  
@@ -149,6 +172,7 @@ const authSlice = createSlice({
     isAuthenticated: !!localStorage.getItem('authToken'),  
     status: "idle",  
     userStatus: "idle",   
+    checkingAuth: false, // Nouveau état pour le check initial
     errors: null  
   },  
   reducers: {  
@@ -159,6 +183,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;  
       state.status = "idle";  
       state.userStatus = "idle";  
+      state.checkingAuth = false;
       state.errors = null;  
       localStorage.removeItem('authToken');  
       localStorage.removeItem('refreshToken');  
@@ -169,42 +194,63 @@ const authSlice = createSlice({
   },  
   extraReducers: (builder) => {  
     builder  
-      // Login  
-      .addCase(loginUser.pending, (state) => {  
-        state.status = "pending";  
-        state.errors = null;  
-      })  
-      .addCase(loginUser.rejected, (state, action) => {  
-        state.status = "rejected";  
-        state.errors = action.payload || action.error.message;  
-        state.isAuthenticated = false;  
-        state.token = null;  
-        state.refreshToken = null;  
-        state.user = null;  
-      })  
-      .addCase(loginUser.fulfilled, (state, action) => {  
-        state.status = "fulfilled";  
-        state.token = action.payload.token;  
-        state.refreshToken = action.payload.refresh_token;  
-        state.isAuthenticated = true;  
-        state.errors = null;  
-         
-        if (action.payload.user) {  
-          state.user = action.payload.user;  
-        }  
-      })  
-        
-      .addCase(fetchUserProfile.pending, (state) => {  
-        state.userStatus = "pending";  
-      })  
-      .addCase(fetchUserProfile.rejected, (state, action) => {  
-        state.userStatus = "rejected";  
-        state.errors = action.payload || action.error.message;  
-      })  
-      .addCase(fetchUserProfile.fulfilled, (state, action) => {  
-        state.userStatus = "fulfilled";  
-        state.user = action.payload;  
-      });  
+    // Login  
+    .addCase(loginUser.pending, (state) => {  
+      state.status = "pending";  
+      state.errors = null;  
+    })  
+    .addCase(loginUser.rejected, (state, action) => {  
+      state.status = "rejected";  
+      state.errors = action.payload || action.error.message;  
+      state.isAuthenticated = false;  
+      state.token = null;  
+      state.refreshToken = null;  
+      state.user = null;  
+    })  
+    .addCase(loginUser.fulfilled, (state, action) => {  
+      state.status = "fulfilled";  
+      state.token = action.payload.token;  
+      state.refreshToken = action.payload.refresh_token;  
+      state.isAuthenticated = true;  
+      state.errors = null;  
+      
+      if (action.payload.user) {  
+        state.user = action.payload.user;  
+      }  
+    })  
+    
+    // Fetch User Profile
+    .addCase(fetchUserProfile.pending, (state) => {  
+      state.userStatus = "pending";  
+    })  
+    .addCase(fetchUserProfile.rejected, (state, action) => {  
+      state.userStatus = "rejected";  
+      state.errors = action.payload || action.error.message;  
+    })  
+    .addCase(fetchUserProfile.fulfilled, (state, action) => {  
+      state.userStatus = "fulfilled";  
+      state.user = action.payload;  
+    })
+
+    // Check Auth Status (NOUVEAU)
+    .addCase(checkAuthStatus.pending, (state) => {
+      state.checkingAuth = true;
+      state.errors = null;
+    })
+    .addCase(checkAuthStatus.rejected, (state, action) => {
+      state.checkingAuth = false;
+      state.isAuthenticated = false;
+      state.token = null;
+      state.refreshToken = null;
+      state.user = null;
+      state.errors = action.payload;
+    })
+    .addCase(checkAuthStatus.fulfilled, (state, action) => {
+      state.checkingAuth = false;
+      state.isAuthenticated = true;
+      state.user = action.payload;
+      state.errors = null;
+    });
   }  
 });
 
@@ -290,6 +336,65 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+
+// Action pour récupérer les advertisements avec authentification
+export const fetchAdvertisements = createAsyncThunk(
+  "advertisements/fetchAdvertisements",
+  async (_, { rejectWithValue, getState }) => {
+    try {
+    const state = getState();
+    const token = state.auth.token;
+    
+    if (!token) {
+    return rejectWithValue("Vous devez être connecté pour voir les annonces.");
+    }
+
+    let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: "/api/v1/advertisements",
+    headers: {
+    'Authorization': `Bearer ${token}`
+    },
+    };
+
+    const response = await axios.request(config);
+    console.log("Response data:", response.data); // Debugging line
+    return response.data;
+    } catch (error) {
+    if (error.response?.status === 401) {
+    return rejectWithValue("Session expirée. Veuillez vous reconnecter.");
+    }
+    return rejectWithValue("Impossible de récupérer les annonces. Veuillez réessayer plus tard.");
+    }
+  }
+);
+
+const advertisementsSlice = createSlice({
+  name: 'advertisements',
+  initialState: {
+    ads: [],
+    status: "idle",
+    errors: null
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+    .addCase(fetchAdvertisements.pending, (state) => {
+    state.status = "pending";
+    state.errors = null;
+    })
+    .addCase(fetchAdvertisements.rejected, (state, action) => {
+    state.status = "rejected";
+    state.errors = action.payload || action.error.message;
+    })
+    .addCase(fetchAdvertisements.fulfilled, (state, action) => {
+    state.status = "fulfilled";
+    state.ads = action.payload;
+    state.errors = null;
+    });
+  }
+});
 
 // Action pour récupérer les instruments  
 export const fetchInstruments = createAsyncThunk(  
@@ -386,6 +491,7 @@ export const store = configureStore({
         pokedex: pokeSlice.reducer,
         musicGroups: musicGroupsSlice.reducer,
         auth: authSlice.reducer,
-        instruments: instrumentsSlice.reducer
+        instruments: instrumentsSlice.reducer,
+        advertisements: advertisementsSlice.reducer
     }
 });

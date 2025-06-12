@@ -5,6 +5,7 @@ import { Container } from "../atoms";
 import Home from "../pages/Home";
 import DrumKitGLB from '../threed/DrumkitGLB';
 import Register from './Register';
+import Advertisements from './Advertisements';
 
 const MainContent = ({ section, onNavigate, theme }) => {
     
@@ -17,6 +18,8 @@ const MainContent = ({ section, onNavigate, theme }) => {
       return <Pokedex />;
     case "register":
       return <Register theme={theme} onNavigate={onNavigate}/>;
+    case "advertisements":
+      return <Advertisements theme={theme} />;
     case "3d":
         return (
           <div style={{height: '600px'}}>

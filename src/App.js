@@ -2,11 +2,12 @@ import './App.css';
 import { Container, Button, Typography } from './components/atoms/';
 import { NightModeProvider } from './context/NightModeContext';
 import { ThemeProvider } from 'styled-components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Ajout de useEffect
 import { Menu } from './components/organisms';
 import { useTheme } from './theme';
 import MainContent from './components/pages/MainContent';
-import { useSelector } from 'react-redux'; // Ajout pour accéder au store Redux
+import { useSelector, useDispatch } from 'react-redux'; // Ajout de useDispatch
+import { checkAuthStatus } from './store';
 
 const nightTheme = {
   background: "#000",
@@ -21,10 +22,20 @@ function App() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [selectedSection, setSelectedSection] = useState("home");
   const theme = useTheme(isNightMode);
+  const dispatch = useDispatch(); // Ajout du dispatch
 
   // Récupération de l'état de connexion et des données utilisateur
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.auth.user);
+  const checkingAuth = useSelector((state) => state.auth.checkingAuth); // Nouvel état
+
+  // Vérification de l'authentification au démarrage
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token && !user) {
+      dispatch(checkAuthStatus());
+    }
+  }, [dispatch, user]);
 
   const toggleNightMode = () => {
     setIsNightMode(prevMode => !prevMode);
@@ -38,9 +49,9 @@ function App() {
   const getMenuItems = () => {
     const baseItems = [
       { id: 1, label: "🏠 Accueil", section: "home" },
-      { id: 5, label: "🎵 Groupes", section: "musicGroups" },
-      { id: 2, label: "3D", section: "3d"},
-      { id: 6, label: "📧 Contact", section: "contact" },
+      { id: 2, label: "📢 Annonces", section: "advertisements" },
+      { id: 3, label: "🎵 Groupes", section: "musicGroups" },
+      { id: 5, label: "📧 Contact", section: "contact" },
     ];
   
     if (isAuthenticated && user) {
@@ -48,7 +59,7 @@ function App() {
       return [
         ...baseItems,
         { 
-          id: 4, 
+          id: 6, 
           label: `👤 Profil (${user.firstname || user.username})`, 
           section: "login" // Même section mais contenu différent
         },
@@ -57,11 +68,36 @@ function App() {
       // Si non connecté, afficher "Connexion" et "Inscription"
       return [
         ...baseItems,
-        { id: 4, label: "🔐 Connexion", section: "login" },
-        { id: 7, label: "📝 Inscription", section: "register" },
+        { id: 7, label: "🔐 Connexion", section: "login" },
+        { id: 8, label: "📝 Inscription", section: "register" },
       ];
     }
   };
+
+  // Affichage de chargement pendant la vérification
+  if (checkingAuth) {
+    return (
+      <ThemeProvider theme={isNightMode ? nightTheme : dayTheme}>
+        <Container.Base 
+          padding="2rem" 
+          style={{
+            minHeight: '100vh',
+            background: theme.colors.current.backgroundGradient,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <Typography.Typography 
+            variant="h2" 
+            color={theme.colors.current.text}
+          >
+            🔄 Vérification de la connexion...
+          </Typography.Typography>
+        </Container.Base>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={isNightMode ? nightTheme : dayTheme}>
