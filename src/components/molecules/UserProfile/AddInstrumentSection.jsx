@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Form, Select, Button } from '../../atoms';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchInstruments, clearInstrumentsError } from '../../../store';
+import { fetchInstruments, clearInstrumentsError, fetchUserProfile } from '../../../store';
 
 const AddInstrumentSection = ({theme, userId}) => {
   const [selectedInstrumentId, setSelectedInstrumentId] = useState('');
@@ -58,22 +58,19 @@ const AddInstrumentSection = ({theme, userId}) => {
       body,
     };
   
-    console.log("Envoi de la requête POST à :", url);
-    console.log("Options de la requête :", options);
-  
     try {  
       const response = await fetch(url, options);
-  
-      console.log("Réponse reçue :", response.status, response.statusText);
-      const responseText = await response.text();
-      console.log("Contenu de la réponse :", responseText);
   
       if (!response.ok) {  
         throw new Error('Erreur lors de l\'ajout de l\'instrument');  
       }  
   
       setSuccessMessage('Instrument ajouté avec succès !');  
-      setSelectedInstrumentId('');  
+      setSelectedInstrumentId('');
+  
+      // Rafraîchir la liste des instruments
+      dispatch(fetchUserProfile());
+  
     } catch (err) {  
       setLocalError(err.message || 'Erreur lors de l\'ajout de l\'instrument');  
     }  
