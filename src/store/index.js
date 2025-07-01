@@ -286,14 +286,106 @@ export const fetchMusicGroups = createAsyncThunk(
   }
 );
 
+// Action pour récupérer les détails complets d'un groupe
+export const fetchMusicGroupDetails = createAsyncThunk(
+  "musicGroups/fetchMusicGroupDetails",
+  async (groupId, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+      
+      if (!token) {
+        return rejectWithValue("Vous devez être connecté pour voir les détails du groupe.");
+      }
+
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `/api/v1/musicgroups/${groupId}`,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      };
+
+      const response = await axios.request(config);
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        return rejectWithValue("Session expirée. Veuillez vous reconnecter.");
+      }
+      if (error.response?.status === 404) {
+        return rejectWithValue("Groupe non trouvé.");
+      }
+      return rejectWithValue("Impossible de récupérer les détails du groupe.");
+    }
+  }
+);
+
+// Action pour modifier un groupe de musique
+export const updateMusicGroup = createAsyncThunk(
+  "musicGroups/updateMusicGroup",
+  async ({ groupId, groupData }, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+      
+      if (!token) {
+        return rejectWithValue("Vous devez être connecté pour modifier un groupe.");
+      }
+
+      let config = {
+        method: "patch",
+        maxBodyLength: Infinity,
+        url: `/api/v1/musicgroups/${groupId}`,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(groupData)
+      };
+
+      const response = await axios.request(config);
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        return rejectWithValue("Session expirée. Veuillez vous reconnecter.");
+      }
+      if (error.response?.status === 403) {
+        return rejectWithValue("Vous n'avez pas l'autorisation de modifier ce groupe.");
+      }
+      if (error.response?.status === 404) {
+        return rejectWithValue("Groupe non trouvé.");
+      }
+      return rejectWithValue("Impossible de modifier le groupe. Veuillez réessayer plus tard.");
+    }
+  }
+);
+
 const musicGroupsSlice = createSlice({
   name: 'musicGroups',
   initialState: {
     groups: [],
+    selectedGroup: null,
     status: "idle",
-    errors: null
+    detailsStatus: "idle",
+    updateStatus: "idle",
+    errors: null,
+    detailsErrors: null,
+    updateErrors: null
   },
-  reducers: {},
+  reducers: {
+    clearUpdateErrors: (state) => {
+      state.updateErrors = null;
+      state.updateStatus = "idle";
+    },
+    clearDetailsErrors: (state) => {
+      state.detailsErrors = null;
+      state.detailsStatus = "idle";
+    },
+    clearSelectedGroup: (state) => {
+      state.selectedGroup = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMusicGroups.pending, (state) => {
@@ -308,9 +400,48 @@ const musicGroupsSlice = createSlice({
         state.status = "fulfilled";
         state.groups = action.payload;
         state.errors = null;
+      })
+      // Fetch group details cases
+      .addCase(fetchMusicGroupDetails.pending, (state) => {
+        state.detailsStatus = "pending";
+        state.detailsErrors = null;
+      })
+      .addCase(fetchMusicGroupDetails.rejected, (state, action) => {
+        state.detailsStatus = "rejected";
+        state.detailsErrors = action.payload || action.error.message;
+      })
+      .addCase(fetchMusicGroupDetails.fulfilled, (state, action) => {
+        state.detailsStatus = "fulfilled";
+        state.selectedGroup = action.payload;
+        state.detailsErrors = null;
+      })
+      // Update music group cases
+      .addCase(updateMusicGroup.pending, (state) => {
+        state.updateStatus = "pending";
+        state.updateErrors = null;
+      })
+      .addCase(updateMusicGroup.rejected, (state, action) => {
+        state.updateStatus = "rejected";
+        state.updateErrors = action.payload || action.error.message;
+      })
+      .addCase(updateMusicGroup.fulfilled, (state, action) => {
+        state.updateStatus = "fulfilled";
+        state.updateErrors = null;
+        // Mettre à jour le groupe dans la liste
+        const updatedGroup = action.payload;
+        const index = state.groups.findIndex(group => group.id === updatedGroup.id);
+        if (index !== -1) {
+          state.groups[index] = updatedGroup;
+        }
+        // Mettre à jour aussi le groupe sélectionné s'il correspond
+        if (state.selectedGroup && state.selectedGroup.id === updatedGroup.id) {
+          state.selectedGroup = updatedGroup;
+        }
       });
   }
 });
+
+export const { clearUpdateErrors, clearDetailsErrors, clearSelectedGroup } = musicGroupsSlice.actions;
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",

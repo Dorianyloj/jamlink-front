@@ -30,39 +30,39 @@ const UserProfile = ({ theme, user, userStatus, onLogout }) => {
 
         {user ? (
           <>
-          <Container.Flex margin={"0 0 1.5rem 0"} wrap="wrap">
-            <Container.Flex width="50%">
-              <UserMolecules.UserInfo theme={theme} user={user} />
+            <Container.Flex margin={"0 0 1.5rem 0"} wrap="wrap">
+              <Container.Flex width="50%">
+                <UserMolecules.UserInfo theme={theme} user={user} />
+              </Container.Flex>
+              <Container.Flex width="50%">
+                <UserMolecules.UserInstruments theme={theme} instruments={user.instruments} user={user}/>
+              </Container.Flex>
+              <Container.Flex width="50%">
+                <UserMolecules.UserMusicGroups theme={theme} musicGroups={user.musicGroups} />
+              </Container.Flex>
+              <Container.Flex width="50%">
+                <UserMolecules.UserLeadingGroups theme={theme} leadingGroups={user.leadingGroups} />
+              </Container.Flex>
             </Container.Flex>
-            <Container.Flex width="50%">
-              <UserMolecules.UserInstruments theme={theme} instruments={user.instruments} user={user}/>
-            </Container.Flex>
-            <Container.Flex width="50%">
-            <UserMolecules.UserMusicGroups theme={theme} musicGroups={user.musicGroups} />
-            </Container.Flex>
-            <Container.Flex width="50%">
-            <UserMolecules.UserLeadingGroups theme={theme} leadingGroups={user.leadingGroups} />
-            </Container.Flex>
-            
-          </Container.Flex>
-            
           </>
-        ) : userStatus === "pending" ? (
-          <Typography.Typography
-            align="center"
-            margin="0 0 1.5rem 0"
-            color={theme.colors.current.textSecondary}
-          >
-            🔄 Chargement du profil...
-          </Typography.Typography>
         ) : (
-          <Typography.Typography
-            align="center"
-            margin="0 0 1.5rem 0"
-            color={theme.colors.current.text}
-          >
-            Vous êtes maintenant connecté et pouvez accéder aux groupes de musique.
-          </Typography.Typography>
+          <Container.Flex direction="column" align="center" margin="2rem 0">
+            <Typography.Typography
+              align="center"
+              margin="0 0 1.5rem 0"
+              color={theme.colors.current.textSecondary}
+              variant="h4"
+            >
+              🔄 Chargement de votre profil...
+            </Typography.Typography>
+            <Typography.Typography
+              align="center"
+              color={theme.colors.current.textSecondary}
+              style={{ fontSize: '0.9rem' }}
+            >
+              Récupération de vos informations personnelles et de vos groupes de musique
+            </Typography.Typography>
+          </Container.Flex>
         )}
 
         <Container.Flex justify="center">

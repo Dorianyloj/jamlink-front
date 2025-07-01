@@ -9,6 +9,7 @@ import * as Section from "./Section/"
 import * as Header from "./Header/"
 import * as Form from "./Form/"
 import * as Select from "./Select/"
+import * as Modal from "./Modal/"
 
 export {
   ContainerComponents as Container,
@@ -21,5 +22,6 @@ export {
   Section,
   Header,
   Form,
-  Select
+  Select,
+  Modal
 }

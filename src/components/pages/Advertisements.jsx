@@ -136,16 +136,16 @@ const Advertisements = ({ theme }) => {
         
         {/* Content - Liste des annonces */}
         {!loading && !error && advertisements && advertisements.length > 0 ? (
-          <Container.Base>
+          <Container.Flex wrap="wrap" gap="1.5rem">
             {advertisements.map((ad) => (
               <Container.Base
                 key={ad.id}
                 margin="0 0 1.5rem 0"
-                padding="1.5rem"
                 bgColor={theme.colors.current.surfaceElevated}
                 rounded
                 elevated
                 style={{
+                  width: '48%',
                   border: `1px solid ${theme.colors.current.border}`,
                   boxShadow: `0 2px 8px ${theme.colors.current.shadow}`
                 }}
@@ -258,7 +258,7 @@ const Advertisements = ({ theme }) => {
                 </Container.Flex>
               </Container.Base>
             ))}
-          </Container.Base>
+          </Container.Flex>
         ) : (
           !loading && !error && (
             <Container.Base 

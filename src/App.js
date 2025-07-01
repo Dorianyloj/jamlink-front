@@ -7,7 +7,7 @@ import { Menu } from './components/organisms';
 import { useTheme } from './theme';
 import MainContent from './components/pages/MainContent';
 import { useSelector, useDispatch } from 'react-redux'; // Ajout de useDispatch
-import { checkAuthStatus } from './store';
+import { checkAuthStatus, fetchMusicGroups } from './store';
 
 const nightTheme = {
   background: "#000",
@@ -21,6 +21,7 @@ const dayTheme = {
 function App() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [selectedSection, setSelectedSection] = useState("home");
+  const [isRefreshingGroups, setIsRefreshingGroups] = useState(false);
   const theme = useTheme(isNightMode);
   const dispatch = useDispatch(); // Ajout du dispatch
 
@@ -28,6 +29,7 @@ function App() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.auth.user);
   const checkingAuth = useSelector((state) => state.auth.checkingAuth); // Nouvel état
+  const authStatus = useSelector((state) => state.auth.status); // Pour détecter une connexion réussie
 
   // Vérification de l'authentification au démarrage
   useEffect(() => {
@@ -37,12 +39,37 @@ function App() {
     }
   }, [dispatch, user]);
 
+  // Navigation automatique vers le profil après connexion réussie
+  useEffect(() => {
+    if (authStatus === "fulfilled" && isAuthenticated && user) {
+      console.log('🎉 Connexion réussie ! Navigation automatique vers le profil...');
+      setSelectedSection("login"); // Navigation vers le profil
+      
+      // Optionnel : Message de bienvenue dans la console
+      console.log(`👋 Bienvenue ${user.firstname || user.username} !`);
+    }
+  }, [authStatus, isAuthenticated, user]);
+
   const toggleNightMode = () => {
     setIsNightMode(prevMode => !prevMode);
   };
 
-  const handleNavigate = (section) => {
+  const handleNavigate = async (section) => {
     setSelectedSection(section);
+    
+    // Si on navigue vers les groupes musicaux, recharger automatiquement la liste
+    if (section === "musicGroups" && isAuthenticated) {
+      setIsRefreshingGroups(true);
+      try {
+        console.log('🔄 Rechargement automatique des groupes musicaux...');
+        await dispatch(fetchMusicGroups()).unwrap();
+        console.log('✅ Groupes musicaux rechargés avec succès !');
+      } catch (error) {
+        console.error('❌ Erreur lors du rechargement des groupes:', error);
+      } finally {
+        setIsRefreshingGroups(false);
+      }
+    }
   };
 
   // Menu dynamique selon l'état de connexion
@@ -50,7 +77,11 @@ function App() {
     const baseItems = [
       { id: 1, label: "🏠 Accueil", section: "home" },
       { id: 2, label: "📢 Annonces", section: "advertisements" },
-      { id: 3, label: "🎵 Groupes", section: "musicGroups" },
+      { 
+        id: 3, 
+        label: isRefreshingGroups ? "🔄 Groupes" : "🎵 Groupes", 
+        section: "musicGroups" 
+      },
       { id: 5, label: "📧 Contact", section: "contact" },
     ];
   

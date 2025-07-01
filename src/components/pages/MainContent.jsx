@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from "../atoms";
-import { Clock, Pokedex, MusicGroups, Login, Threed } from "../pages";
+import { Clock, Pokedex, MusicGroups, Login } from "../pages";
 import { Container } from "../atoms";
 import Home from "../pages/Home";
 import DrumKitGLB from '../threed/DrumkitGLB';
@@ -55,7 +55,7 @@ const MainContent = ({ section, onNavigate, theme }) => {
         </Container.FadeIn>
       );
     case "musicGroups":
-      return <MusicGroups />;
+      return <MusicGroups theme={theme}/>;
     default:
       return (
         <Container.FadeIn>

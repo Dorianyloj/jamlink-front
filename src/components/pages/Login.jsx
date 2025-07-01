@@ -16,10 +16,11 @@ const Login = ({ theme }) => {
   const userStatus = useSelector((state) => state.auth.userStatus);
 
   useEffect(() => {
-    if (isAuthenticated && !user && userStatus === "idle") {
+    if (isAuthenticated && !user) {
+      console.log('🔄 Chargement automatique du profil utilisateur...');
       dispatch(fetchUserProfile());
     }
-  }, [isAuthenticated, user, userStatus, dispatch]);
+  }, [isAuthenticated, user, dispatch]);
 
   const handleLogin = (e) => {
     e.preventDefault();

@@ -2,16 +2,24 @@ import React from 'react';
 import { Container, Card } from '../atoms';
 import { MusicGroups } from '../molecules';
 
-const MusicGroupCard = ({ group }) => {
+const MusicGroupCard = ({ group, theme }) => {
   const leaderName = `${group.userLeader.firstname} ${group.userLeader.lastname}`;
 
   return (
     <Container.FadeIn>
-      <Card.Card hover>
+      <Card.Card 
+        hover
+        style={{
+          backgroundColor: theme.colors.current.surfaceElevated,
+          border: `1px solid ${theme.colors.current.border}`,
+          boxShadow: `0 2px 8px ${theme.colors.current.shadow}`
+        }}
+      >
         {/* Header */}
         <MusicGroups.MusicGroupHeader 
           groupName={group.name}
           leaderName={leaderName}
+          theme={theme}
         />
 
         {/* Contenu */}
@@ -25,13 +33,21 @@ const MusicGroupCard = ({ group }) => {
               level={group.level}
               currentMembers={group.users.length}
               maxMembers={group.maxMembers}
+              theme={theme}
             />
 
             {/* Styles musicaux */}
-            <MusicGroups.MusicStylesList styles={group.musicStyles} />
+            <MusicGroups.MusicStylesList 
+              styles={group.musicStyles} 
+              theme={theme}
+            />
 
             {/* Membres */}
-            <MusicGroups.MembersList members={group.users} maxDisplay={1} />
+            <MusicGroups.MembersList 
+              members={group.users} 
+              maxDisplay={1} 
+              theme={theme}
+            />
 
           </Container.Flex>
         </Container.Base>
