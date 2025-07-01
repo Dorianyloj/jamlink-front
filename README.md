@@ -145,8 +145,6 @@ jamlink-front/
 ```bash
 # Développement
 npm start              # Démarrer en mode développement (port 3001)
-npm test               # Lancer les tests unitaires
-npm run test:coverage  # Tests avec couverture de code
 
 # Production
 npm run build          # Build optimisé pour production
@@ -331,17 +329,9 @@ npm run build
 
 ---
 
-## 📄 Licence
-
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
 ## 👨‍💻 Équipe
 
-Développé avec ❤️ par l'équipe JamLink
-
-**Contribuer** : Les contributions sont les bienvenues ! Consultez notre guide de contribution.
+Développé avec ❤️ par l'équipe JamLink (moi seul)
 
 ---
 
