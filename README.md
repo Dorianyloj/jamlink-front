@@ -117,8 +117,6 @@ jamlink-front/
 ```bash
 # Développement
 npm start              # Démarrer en mode développement (port 3001)
-npm test               # Lancer les tests unitaires
-npm run test:coverage  # Tests avec couverture de code
 
 # Production
 npm run build          # Build optimisé pour production
