@@ -35,6 +35,34 @@
 
 ---
 
+## 🗺️ Roadmap & Fonctionnalités à venir
+
+### 🎯 **Prochaines versions**
+
+- **📋 Gestion avancée des candidatures**
+  - Système de demandes pour rejoindre un groupe via annonces
+  - Interface d'acceptation/refus des candidatures par les leaders
+  - Notifications en temps réel pour les demandes
+
+- **🎪 Création et gestion de groupes**
+  - Assistant de création de groupes avec paramètres personnalisés
+  - Invitation directe de musiciens par email/pseudo
+  - Gestion des rôles et permissions avancées
+
+- **📅 Planning et organisation**
+  - Calendrier intégré pour planifier les répétitions
+  - Système de réservation de créneaux
+  - Rappels automatiques et synchronisation calendrier
+
+- **📢 Système d'annonces avancé**
+  - Publication d'annonces de recherche de musiciens
+  - Filtres géographiques et par niveau
+  - Matching automatique basé sur les profils
+
+> 💡 **Contribuer aux fonctionnalités** : Vos idées et contributions sont les bienvenues pour enrichir ces fonctionnalités !
+
+---
+
 ## 🚀 Installation et démarrage rapide
 
 ### Prérequis
