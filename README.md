@@ -301,17 +301,9 @@ npm run build
 
 ---
 
-## 📄 Licence
-
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
 ## 👨‍💻 Équipe
 
-Développé avec ❤️ par l'équipe JamLink
-
-**Contribuer** : Les contributions sont les bienvenues ! Consultez notre guide de contribution.
+Développé avec ❤️ par l'équipe JamLink (moi seul)
 
 ---
 
